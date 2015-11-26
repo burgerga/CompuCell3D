@@ -330,25 +330,43 @@ using namespace CompuCell3D;
         
     __swig_setmethods__["zCM"] = setzCM     
     if _newclass: zCM = property(_CompuCell.CellG_zCM_get,setzCM)
-    
+
 
     def setxCOM(self,_xCOM):
         raise AttributeError('ASSIGNMENT cell.xCOM=%s is illegal. xCOM is read only variable'%(_xCOM))
-        
-    __swig_setmethods__["xCOM"] = setxCOM     
+
+    __swig_setmethods__["xCOM"] = setxCOM
     if _newclass: xCOM = property(_CompuCell.CellG_xCOM_get,setxCOM)
-    
+
     def setyCOM(self,_yCOM):
         raise AttributeError('ASSIGNMENT cell.yCOM=%s is illegal. yCOM is read only variable'%(_yCOM))
-        
-    __swig_setmethods__["yCOM"] = setyCOM     
+
+    __swig_setmethods__["yCOM"] = setyCOM
     if _newclass: yCOM = property(_CompuCell.CellG_yCOM_get,setyCOM)
-    
+
     def setzCOM(self,_zCOM):
         raise AttributeError('ASSIGNMENT cell.zCOM=%s is illegal. zCOM is read only variable'%(_zCOM))
-        
-    __swig_setmethods__["zCOM"] = setzCOM     
+
+    __swig_setmethods__["zCOM"] = setzCOM
     if _newclass: zCOM = property(_CompuCell.CellG_zCOM_get,setzCOM)
+
+    def setxCCOM(self,_xCCOM):
+        raise AttributeError('ASSIGNMENT cell.xCCOM=%s is illegal. xCCOM is read only variable'%(_xCCOM))
+        
+    __swig_setmethods__["xCCOM"] = setxCCOM
+    if _newclass: xCCOM = property(_CompuCell.CellG_xCCOM_get,setxCCOM)
+    
+    def setyCCOM(self,_yCCOM):
+        raise AttributeError('ASSIGNMENT cell.yCCOM=%s is illegal. yCCOM is read only variable'%(_yCCOM))
+        
+    __swig_setmethods__["yCCOM"] = setyCCOM
+    if _newclass: yCCOM = property(_CompuCell.CellG_yCCOM_get,setyCCOM)
+    
+    def setzCCOM(self,_zCCOM):
+        raise AttributeError('ASSIGNMENT cell.zCCOM=%s is illegal. zCCOM is read only variable'%(_zCCOM))
+        
+    __swig_setmethods__["zCCOM"] = setzCCOM
+    if _newclass: zCCOM = property(_CompuCell.CellG_zCCOM_get,setzCCOM)
     
     def setxCOMPrev(self,_xCOMPrev):
         raise AttributeError('ASSIGNMENT cell.xCOMPrev=%s is illegal. xCOMPrev is read only variable'%(_xCOMPrev))

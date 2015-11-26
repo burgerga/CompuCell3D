@@ -53,6 +53,8 @@ namespace CompuCell3D {
         type(0),
         xCM(0),yCM(0),zCM(0),
 		xCOM(0),yCOM(0),zCOM(0),
+        crossedX(0), crossedY(0), crossedZ(0),
+        xCCOM(0),yCCOM(0),zCCOM(0),
 		xCOMPrev(0),yCOMPrev(0),zCOMPrev(0),
         iXX(0), iXY(0), iXZ(0), iYY(0), iYZ(0), iZZ(0),
         lX(0.0),
@@ -81,8 +83,12 @@ namespace CompuCell3D {
       unsigned char type;
       unsigned char subtype;
       double xCM,yCM,zCM; // numerator of center of mass expression (components)
-	  double xCOM,yCOM,zCOM; // numerator of center of mass expression (components)
-	  double xCOMPrev,yCOMPrev,zCOMPrev; // previous center of mass 
+	  double xCOM,yCOM,zCOM; // center of mass (xCOM = xCM / volume)
+      // counters to keep track on how often a cell cross the boundaries, +1 crosses to the right, -1 crosses to the left
+      int crossedX, crossedY, crossedZ;
+      // continued center of mass, meaning that we don't reset if the particle crosses the periodic boundary
+      double xCCOM,yCCOM,zCCOM;
+	  double xCOMPrev,yCOMPrev,zCOMPrev; // previous center of mass
       double iXX, iXY, iXZ, iYY, iYZ, iZZ; // tensor of inertia components
       float lX,lY,lZ; //orientation vector components - set by MomentsOfInertia Plugin - read only
       float ecc; // cell eccentricity

@@ -271,25 +271,31 @@ void CompuCell3D::CenterOfMassPlugin::field3DChange(const Point3D &pt, CellG *ne
 		//Check if CM is in the allowed area
 		if( xCM/(float)oldCell->volume < allowedAreaMin.x){
 			xCM += distanceVec.x*oldCell->volume;
+			oldCell->crossedX -= 1;
 		}else if ( xCM/(float)oldCell->volume > allowedAreaMax.x){ //will allow to have xCM/vol slightly bigger (by 1) value than max lattice point
 			//to avoid rollovers for unsigned int from oldCell->xCM
 
 			//       cerr<<"\t\t\tShifting centroid xCM="<<xCM/(float)oldCell->volume<<endl;
 			xCM -= distanceVec.x*oldCell->volume;
+			oldCell->crossedX += 1;
 			//       cerr<<"\t\t\tShiftedxCM="<<xCM/(float)oldCell->volume<<endl;
 
 		}
 
 		if( yCM/(float)oldCell->volume < allowedAreaMin.y){
 			yCM += distanceVec.y*oldCell->volume;
+			oldCell->crossedY -= 1;
 		}else if ( yCM/(float)oldCell->volume > allowedAreaMax.y){
 			yCM -= distanceVec.y*oldCell->volume;
+			oldCell->crossedY += 1;
 		}
 
 		if( zCM/(float)oldCell->volume < allowedAreaMin.z){
 			zCM += distanceVec.z*oldCell->volume;
+			oldCell->crossedZ -= 1;
 		}else if ( zCM/(float)oldCell->volume > allowedAreaMax.z){
 			zCM -= distanceVec.z*oldCell->volume;
+			oldCell->crossedZ += 1;
 		}
 
 
@@ -331,6 +337,11 @@ void CompuCell3D::CenterOfMassPlugin::field3DChange(const Point3D &pt, CellG *ne
 			oldCell->yCOM = 0.0;
 			oldCell->zCOM = 0.0;
 		}
+
+		// storing continued center of mass
+		oldCell->xCCOM = oldCell->xCOM + oldCell->crossedX * distanceVec.x;
+		oldCell->yCCOM = oldCell->yCOM + oldCell->crossedY * distanceVec.y;
+		oldCell->zCCOM = oldCell->zCOM + oldCell->crossedZ * distanceVec.z;
 
 		if(potts->checkIfFrozen(oldCell->type)){
 			oldCell->xCOMPrev= oldCell->xCM/(oldCell->volume);
@@ -400,21 +411,27 @@ void CompuCell3D::CenterOfMassPlugin::field3DChange(const Point3D &pt, CellG *ne
 		//Check if CM is in the lattice
 		if( xCM/(float)newCell->volume < allowedAreaMin.x){
 			xCM += distanceVec.x*newCell->volume;
+			newCell->crossedX -= 1;
 		}else if ( xCM/(float)newCell->volume > allowedAreaMax.x){ //will allow to have xCM/vol slightly bigger (by 1) value than max lattice point
 			//to avoid rollovers for unsigned int from oldCell->xCM
 			xCM -= distanceVec.x*newCell->volume;
+			newCell->crossedX += 1;
 		}
 
 		if( yCM/(float)newCell->volume < allowedAreaMin.y){
 			yCM += distanceVec.y*newCell->volume;
+			newCell->crossedY -= 1;
 		}else if ( yCM/(float)newCell->volume > allowedAreaMax.y){
 			yCM -= distanceVec.y*newCell->volume;
+			newCell->crossedY += 1;
 		}
 
 		if( zCM/(float)newCell->volume < allowedAreaMin.z){
 			zCM += distanceVec.z*newCell->volume;
+			newCell->crossedZ -= 1;
 		}else if ( zCM/(float)newCell->volume > allowedAreaMax.z){
 			zCM -= distanceVec.z*newCell->volume;
+			newCell->crossedZ += 1;
 		}
 
 
@@ -446,6 +463,11 @@ void CompuCell3D::CenterOfMassPlugin::field3DChange(const Point3D &pt, CellG *ne
 		newCell->xCOM = newCell->xCM /newCell->volume;
 		newCell->yCOM = newCell->yCM /newCell->volume;
 		newCell->zCOM = newCell->zCM /newCell->volume;
+
+		// storing continued center of mass
+		newCell->xCCOM = newCell->xCOM + newCell->crossedX * distanceVec.x;
+		newCell->yCCOM = newCell->yCOM + newCell->crossedY * distanceVec.y;
+		newCell->zCCOM = newCell->zCOM + newCell->crossedZ * distanceVec.z;
 
 		if(potts->checkIfFrozen(newCell->type)){
 			
@@ -498,7 +520,7 @@ void CenterOfMassPlugin::handleEvent(CC3DEvent & _event){
 //    CellInventory &cellInventory = potts->getCellInventory();
 //    CellInventory::cellInventoryIterator cInvItr;
 //    CellG * cell;
-//    
+//
 //    cerr<<"THIS IS UPDATE COMS"<<endl;
 //    for(cInvItr=cellInventory.cellInventoryBegin() ; cInvItr !=cellInventory.cellInventoryEnd() ;++cInvItr )
 //    {
@@ -513,8 +535,8 @@ void CenterOfMassPlugin::handleEvent(CC3DEvent & _event){
 //		cell->zCM+=_shiftVec.z*cell->volume;
 //
 //    }
-//    
-//    
+//
+//
 //}
 
 std::string CenterOfMassPlugin::toString(){return "CenterOfMass";}
@@ -523,13 +545,13 @@ std::string CenterOfMassPlugin::steerableName(){return toString();}
 void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *oldCell){
 	//if no boundary conditions are present
 	//    if ( !boundaryConditionIndicator.x && !boundaryConditionIndicator.y && !boundaryConditionIndicator.z ){
-	// 
+	//
 	//       if (oldCell) {
 	//          oldCell->xCM -= pt.x;
 	//          oldCell->yCM -= pt.y;
 	//          oldCell->zCM -= pt.z;
 	//       }
-	// 
+	//
 	//       if (newCell) {
 	//          newCell->xCM += pt.x;
 	//          newCell->yCM += pt.y;
@@ -537,39 +559,39 @@ void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *o
 	//       }
 	//       return;
 	//    }
-	// 
-	// 
+	//
+	//
 	//    Point3D shiftVec;
 	//    Point3D shiftedPt;
 	//    int xCM,yCM,zCM; //temporary centroids
-	// 
+	//
 	//    int nxCM,nyCM,nzCM; //temporary centroids
 	//    int oxCM,oyCM,ozCM; //temporary centroids
-	// 
+	//
 	//    int x,y,z;
 	//    int xo,yo,zo;
 	// //     cerr<<"CM PLUGIN"<<endl;
-	//     
+	//
 	//   if (oldCell) {
-	// 
+	//
 	//    xo=oldCell->xCM;
 	//    yo=oldCell->yCM;
 	//    zo=oldCell->zCM;
-	// 
+	//
 	//    x=oldCell->xCM-pt.x;
 	//    y=oldCell->yCM-pt.y;
 	//    z=oldCell->zCM-pt.z;
-	//       
+	//
 	//     //calculating shiftVec - to translate CM
-	// 
+	//
 	//     //(oldCell->xCM/(float)(oldCell->volume+1) -pos of CM before th flip - note that volume is updated earlier
-	// 
-	//     //shift is defined to be zero vector for non-periodic b.c. - everything reduces to naive calculations then   
+	//
+	//     //shift is defined to be zero vector for non-periodic b.c. - everything reduces to naive calculations then
 	//     shiftVec.x= (short)((oldCell->xCM/(float)(oldCell->volume+1)-fieldDim.x/2)*boundaryConditionIndicator.x);
 	//     shiftVec.y= (short)((oldCell->yCM/(float)(oldCell->volume+1)-fieldDim.y/2)*boundaryConditionIndicator.y);
 	//     shiftVec.z= (short)((oldCell->zCM/(float)(oldCell->volume+1)-fieldDim.z/2)*boundaryConditionIndicator.z);
-	// 
-	// 
+	//
+	//
 	//     //shift CM to approximately center of lattice, new centroids are:
 	//     xCM = oldCell->xCM - shiftVec.x*(oldCell->volume+1);
 	//     yCM = oldCell->yCM - shiftVec.y*(oldCell->volume+1);
@@ -577,20 +599,20 @@ void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *o
 	//     //Now shift pt
 	//     shiftedPt=pt;
 	//     shiftedPt-=shiftVec;
-	//     
+	//
 	//     //making sure that shifterd point is in the lattice
 	//     if(shiftedPt.x < 0){
 	//       shiftedPt.x += fieldDim.x;
 	//     }else if (shiftedPt.x > fieldDim.x-1){
 	//       shiftedPt.x -= fieldDim.x;
-	//     }  
-	// 
+	//     }
+	//
 	//     if(shiftedPt.y < 0){
 	//       shiftedPt.y += fieldDim.y;
 	//     }else if (shiftedPt.y > fieldDim.y-1){
 	//       shiftedPt.y -= fieldDim.y;
-	//     }  
-	// 
+	//     }
+	//
 	//     if(shiftedPt.z < 0){
 	//       shiftedPt.z += fieldDim.z;
 	//     }else if (shiftedPt.z > fieldDim.z-1){
@@ -600,61 +622,61 @@ void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *o
 	//     xCM -= shiftedPt.x;
 	//     yCM -= shiftedPt.y;
 	//     zCM -= shiftedPt.z;
-	// 
+	//
 	//     //shift back centroids
 	//     xCM += shiftVec.x * oldCell->volume;
 	//     yCM += shiftVec.y * oldCell->volume;
 	//     zCM += shiftVec.z * oldCell->volume;
-	// 
+	//
 	//     //Check if CM is in the lattice
 	//     if( xCM/(float)oldCell->volume < 0){
 	//       xCM += fieldDim.x*oldCell->volume;
 	//     }else if ( xCM/(float)oldCell->volume > fieldDim.x){ //will allow to have xCM/vol slightly bigger (by 1) value than max lattice point
 	//                                                          //to avoid rollovers for unsigned int from oldCell->xCM
-	//                                                          
+	//
 	// //       cerr<<"\t\t\tShifting centroid xCM="<<xCM/(float)oldCell->volume<<endl;
 	//       xCM -= fieldDim.x*oldCell->volume;
 	// //       cerr<<"\t\t\tShiftedxCM="<<xCM/(float)oldCell->volume<<endl;
 	//     }
-	// 
+	//
 	//     if( yCM/(float)oldCell->volume < 0){
 	//       yCM += fieldDim.y*oldCell->volume;
 	//     }else if ( yCM/(float)oldCell->volume > fieldDim.y){
 	//       yCM -= fieldDim.y*oldCell->volume;
 	//     }
-	// 
+	//
 	//     if( zCM/(float)oldCell->volume < 0){
 	//       zCM += fieldDim.z*oldCell->volume;
 	//     }else if ( zCM/(float)oldCell->volume > fieldDim.z){
 	//       zCM -= fieldDim.z*oldCell->volume;
 	//     }
-	//         
+	//
 	//     oldCell->xCM = xCM;
 	//     oldCell->yCM = yCM;
 	//     oldCell->zCM = zCM;
-	// 
+	//
 	//     oxCM = xCM;
 	//     oyCM = yCM;
 	//     ozCM = zCM;
-	// 
+	//
 	//    cerr<<" oxCM="<<oxCM<<" oyCM="<<oyCM<<" ozCM="<<ozCM<<endl;
 	//   }
-	// 
+	//
 	//   if (newCell) {
-	// 
+	//
 	//     xo=newCell->xCM;
 	//     yo=newCell->yCM;
 	//     zo=newCell->zCM;
-	// 
+	//
 	//     x=newCell->xCM+pt.x;
 	//     y=newCell->yCM+pt.y;
 	//     z=newCell->zCM+pt.z;
-	//   
+	//
 	//     if(newCell->volume==1){
 	//       shiftVec.x=0;
 	//       shiftVec.y=0;
 	//       shiftVec.z=0;
-	//       
+	//
 	//     }else{
 	//       shiftVec.x= (short)((newCell->xCM/(float)(newCell->volume-1)-fieldDim.x/2)*boundaryConditionIndicator.x);
 	//       shiftVec.y= (short)((newCell->yCM/(float)(newCell->volume-1)-fieldDim.y/2)*boundaryConditionIndicator.y);
@@ -668,37 +690,37 @@ void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *o
 	//     //Now shift pt
 	//     shiftedPt=pt;
 	//     shiftedPt-=shiftVec;
-	// 
+	//
 	//     //making sure that shifted point is in the lattice
 	//     if(shiftedPt.x < 0){
 	//       shiftedPt.x += fieldDim.x;
 	//     }else if (shiftedPt.x > fieldDim.x-1){
 	// //       cerr<<"shifted pt="<<shiftedPt<<endl;
 	//       shiftedPt.x -= fieldDim.x;
-	//     }  
-	// 
+	//     }
+	//
 	//     if(shiftedPt.y < 0){
 	//       shiftedPt.y += fieldDim.y;
 	//     }else if (shiftedPt.y > fieldDim.y-1){
 	//       shiftedPt.y -= fieldDim.y;
-	//     }  
-	// 
+	//     }
+	//
 	//     if(shiftedPt.z < 0){
 	//       shiftedPt.z += fieldDim.z;
 	//     }else if (shiftedPt.z > fieldDim.z-1){
 	//       shiftedPt.z -= fieldDim.z;
-	//     }    
-	// 
+	//     }
+	//
 	//     //update shifted centroids
 	//     xCM += shiftedPt.x;
 	//     yCM += shiftedPt.y;
 	//     zCM += shiftedPt.z;
-	//     
+	//
 	//     //shift back centroids
 	//     xCM += shiftVec.x * newCell->volume;
 	//     yCM += shiftVec.y * newCell->volume;
 	//     zCM += shiftVec.z * newCell->volume;
-	//     
+	//
 	//     //Check if CM is in the lattice
 	//     if( xCM/(float)newCell->volume < 0){
 	//       xCM += fieldDim.x*newCell->volume;
@@ -706,28 +728,28 @@ void CenterOfMassPlugin::field3DCheck(const Point3D &pt, CellG *newCell,CellG *o
 	//                                                          //to avoid rollovers for unsigned int from oldCell->xCM
 	//       xCM -= fieldDim.x*newCell->volume;
 	//     }
-	// 
+	//
 	//     if( yCM/(float)newCell->volume < 0){
 	//       yCM += fieldDim.y*newCell->volume;
 	//     }else if ( yCM/(float)newCell->volume > fieldDim.y){
 	//       yCM -= fieldDim.y*newCell->volume;
 	//     }
-	// 
+	//
 	//     if( zCM/(float)newCell->volume < 0){
 	//       zCM += fieldDim.z*newCell->volume;
 	//     }else if ( zCM/(float)newCell->volume > fieldDim.z){
 	//       zCM -= fieldDim.z*newCell->volume;
 	//     }
-	//         
+	//
 	//     newCell->xCM = xCM;
 	//     newCell->yCM = yCM;
 	//     newCell->zCM = zCM;
-	// 
+	//
 	//     nxCM = xCM;
 	//     nyCM = yCM;
 	//     nzCM = zCM;
-	// 
+	//
 	//     cerr<<" nxCM="<<nxCM<<" nyCM="<<nyCM<<" nzCM="<<nzCM<<endl;
-	//     
+	//
 	//   }
 }
