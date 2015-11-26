@@ -484,3 +484,6 @@ endif (BUILD_QT_WRAPPERS)
 ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(player)
 ADD_SUBDIRECTORY(Twedit++)
+
+# Stuff added by Gerhard
+ADD_CUSTOM_TARGET(run_install COMMAND ${CMAKE_MAKE_PROGRAM} install)
