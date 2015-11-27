@@ -76,7 +76,8 @@ void SaveCOM::update(CC3DXMLElement *_xmlData, bool _fullInitFlag) {
   set<unsigned char> cellTypesSet;
 
   if (_xmlData->findAttribute("Frequency")) {
-    frequency = (int) strtol(_xmlData->getAttribute("Frequency"));
+    char *end;
+    frequency = (int) strtol(_xmlData->getAttribute("Frequency").c_str(), &end, 10);
   }
 
   if (_xmlData->findElement("COMFileName")) {
