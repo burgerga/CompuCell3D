@@ -32,8 +32,13 @@ void SaveCOM::init(Simulator *simulator, CC3DXMLElement *_xmlData) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SaveCOM::extraInit(Simulator *simulator){
-    //PUT YOUR CODE HERE
+void SaveCOM::extraInit(Simulator *simulator) {
+  bool pluginAlreadyRegisteredFlag;
+  Plugin *plugin = Simulator::pluginManager.get("CenterOfMass",
+                                                &pluginAlreadyRegisteredFlag); //this will load VolumeTracker plugin if it is not already loaded
+  if (!pluginAlreadyRegisteredFlag)
+    plugin->init(simulator);
+  ASSERT_OR_THROW("CenterOfMass plugin not initialized!", plugin);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
