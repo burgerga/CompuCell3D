@@ -32,6 +32,8 @@ class SAVECOM_EXPORT SaveCOM: public Steppable {
   CellInventory *cellInventoryPtr;
 
   Dim3D fieldDim;
+  int frequency;
+  string COMFileName;
 
 
  public:

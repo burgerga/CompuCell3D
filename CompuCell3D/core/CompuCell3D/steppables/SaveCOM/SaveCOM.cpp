@@ -7,7 +7,8 @@ using namespace std;
 #include "SaveCOM.h"
 
 SaveCOM::SaveCOM()
-    : cellFieldG(0), sim(0), potts(0), xmlData(0), boundaryStrategy(0), automaton(0), cellInventoryPtr(0) { }
+    : cellFieldG(0), sim(0), potts(0), xmlData(0), boundaryStrategy(0), automaton(0), cellInventoryPtr(0), frequency(1),
+      COMFileName("com.tsv") { }
 
 SaveCOM::~SaveCOM() {
 }
@@ -74,15 +75,13 @@ void SaveCOM::update(CC3DXMLElement *_xmlData, bool _fullInitFlag) {
                   automaton)
   set<unsigned char> cellTypesSet;
 
-  CC3DXMLElement *exampleXMLElem = _xmlData->getFirstElement("Example");
-  if (exampleXMLElem) {
-    double param = exampleXMLElem->getDouble();
-    cerr << "param=" << param << endl;
-    if (exampleXMLElem->findAttribute("Type")) {
-      std::string attrib = exampleXMLElem->getAttribute("Type");
-      // double attrib=exampleXMLElem->getAttributeAsDouble("Type"); //in case attribute is of type double
-      cerr << "attrib=" << attrib << endl;
-    }
+  if (_xmlData->findAttribute("Frequency")) {
+    frequency = (int) strtol(_xmlData->getAttribute("Frequency"));
+  }
+
+  if (_xmlData->findElement("COMFileName")) {
+    CC3DXMLElement *COMFileNameElement = _xmlData->getFirstElement("COMFileName");
+    COMFileName = COMFileNameElement->getText();
   }
 
   //boundaryStrategy has information aobut pixel neighbors
