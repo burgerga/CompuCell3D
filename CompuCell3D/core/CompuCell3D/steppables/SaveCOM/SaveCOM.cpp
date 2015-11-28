@@ -7,36 +7,33 @@ using namespace std;
 #include "SaveCOM.h"
 
 SaveCOM::SaveCOM()
-    : cellFieldG(0), sim(0), potts(0), xmlData(0), boundaryStrategy(0), automaton(0), cellInventoryPtr(0), frequency(1),
-      COMFileName("com.tsv") { }
+    : cell_field_(0), simulator_(0), potts_(0), xml_data_(0), cell_inventory_ptr_(0), frequency_(1),
+      com_fname_("com.tsv") { }
 
 SaveCOM::~SaveCOM() {
 }
 
 
-void SaveCOM::init(Simulator *simulator, CC3DXMLElement *_xmlData) {
-  xmlData = _xmlData;
+void SaveCOM::init(Simulator *simulator, CC3DXMLElement *xml_data) {
+  xml_data_ = xml_data;
 
-  potts = simulator->getPotts();
-  cellInventoryPtr = &potts->getCellInventory();
-  sim = simulator;
-  cellFieldG = (WatchableField3D<CellG *> *) potts->getCellFieldG();
-  fieldDim = cellFieldG->getDim();
+  simulator_ = simulator;
+  potts_ = simulator_->getPotts();
+  cell_inventory_ptr_ = &potts_->getCellInventory();
+  cell_field_ = (WatchableField3D<CellG *> *) potts_->getCellFieldG();
 
+  simulator_->registerSteerableObject(this);
 
-  simulator->registerSteerableObject(this);
-
-  update(_xmlData, true);
+  update(xml_data_, true);
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SaveCOM::extraInit(Simulator *simulator) {
-  bool pluginAlreadyRegisteredFlag;
-  Plugin *plugin = Simulator::pluginManager.get("CenterOfMass",
-                                                &pluginAlreadyRegisteredFlag); //this will load VolumeTracker plugin if it is not already loaded
-  if (!pluginAlreadyRegisteredFlag)
+  bool is_registered;
+  Plugin *plugin = Simulator::pluginManager.get("CenterOfMass", &is_registered);
+  if (!is_registered)
     plugin->init(simulator);
   ASSERT_OR_THROW("CenterOfMass plugin not initialized!", plugin);
 }
@@ -52,41 +49,31 @@ void SaveCOM::start() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SaveCOM::step(const unsigned int currentStep) {
+void SaveCOM::step(const unsigned int current_step) {
   //REPLACE SAMPLE CODE BELOW WITH YOUR OWN
-  CellInventory::cellInventoryIterator cInvItr;
+  CellInventory::cellInventoryIterator cell_iterator;
   CellG *cell = 0;
 
-  cerr << "currentStep=" << currentStep << endl;
-  for (cInvItr = cellInventoryPtr->cellInventoryBegin(); cInvItr != cellInventoryPtr->cellInventoryEnd(); ++cInvItr) {
-    cell = cellInventoryPtr->getCell(cInvItr);
+  cerr << "currentStep=" << current_step << endl;
+  for (cell_iterator = cell_inventory_ptr_->cellInventoryBegin();
+       cell_iterator != cell_inventory_ptr_->cellInventoryEnd(); ++cell_iterator) {
+    cell = cell_inventory_ptr_->getCell(cell_iterator);
     cerr << "cell.id=" << cell->id << " vol=" << cell->volume << endl;
   }
 
 }
 
 
-void SaveCOM::update(CC3DXMLElement *_xmlData, bool _fullInitFlag) {
-
-  //PARSE XML IN THIS FUNCTION
-  //For more information on XML parser function please see CC3D code or lookup XML utils API
-  automaton = potts->getAutomaton();
-  ASSERT_OR_THROW("CELL TYPE PLUGIN WAS NOT PROPERLY INITIALIZED YET. MAKE SURE THIS IS THE FIRST PLUGIN THAT YOU SET",
-                  automaton)
-  set<unsigned char> cellTypesSet;
-
-  if (_xmlData->findAttribute("Frequency")) {
+void SaveCOM::update(CC3DXMLElement *xml_data, bool full_init_flag) {
+  if (xml_data->findAttribute("Frequency")) {
     char *end;
-    frequency = (int) strtol(_xmlData->getAttribute("Frequency").c_str(), &end, 10);
+    frequency_ = (int) strtol(xml_data->getAttribute("Frequency").c_str(), &end, 10);
   }
 
-  if (_xmlData->findElement("COMFileName")) {
-    CC3DXMLElement *COMFileNameElement = _xmlData->getFirstElement("COMFileName");
-    COMFileName = COMFileNameElement->getText();
+  if (xml_data->findElement("COMFileName")) {
+    CC3DXMLElement *COMFileNameElement = xml_data->getFirstElement("COMFileName");
+    com_fname_ = COMFileNameElement->getText();
   }
-
-  //boundaryStrategy has information aobut pixel neighbors
-  boundaryStrategy = BoundaryStrategy::getInstance();
 
 }
 
