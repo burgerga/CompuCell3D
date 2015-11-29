@@ -8,7 +8,7 @@ using namespace std;
 
 SaveCOM::SaveCOM()
     : cell_field_(0), simulator_(0), potts_(0), xml_data_(0), cell_inventory_ptr_(0), frequency_(1),
-      com_fname_("com.tsv") { }
+      com_fname_("com.tsv"), is_first_output_(true) { }
 
 SaveCOM::~SaveCOM() {
 }
@@ -41,38 +41,51 @@ void SaveCOM::extraInit(Simulator *simulator) {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SaveCOM::start() {
-
-  //PUT YOUR CODE HERE
-
-}
+void SaveCOM::start() { }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SaveCOM::step(const unsigned int current_step) {
-  //REPLACE SAMPLE CODE BELOW WITH YOUR OWN
-  CellInventory::cellInventoryIterator cell_iterator;
-  CellG *cell = 0;
-
-  cerr << "currentStep=" << current_step << endl;
-  for (cell_iterator = cell_inventory_ptr_->cellInventoryBegin();
-       cell_iterator != cell_inventory_ptr_->cellInventoryEnd(); ++cell_iterator) {
-    cell = cell_inventory_ptr_->getCell(cell_iterator);
-    cerr << "cell.id=" << cell->id << " vol=" << cell->volume << endl;
+  ios_base::openmode open_mode = ios::out;
+  if (!is_first_output_) {
+    // If not the first time we append
+    open_mode |= ios::app;
   }
 
+  ofstream output_com_file;
+  output_com_file.open(com_fname_.c_str(), open_mode);
+  ASSERT_OR_THROW("Can't open output com file\n", output_com_file.is_open())
+
+  string sep = "\t";
+  if (is_first_output_) {
+    // write headers to the file
+    output_com_file << "id" << sep << "step" << sep << "xCom" << sep << "yCom" << sep << "zCom"
+        << sep << "xCCOM" << sep << "yCCOM" << sep << "zCCOM" << endl;
+  }
+
+  for (CellInventory::cellInventoryIterator cell_iterator = cell_inventory_ptr_->cellInventoryBegin();
+       cell_iterator != cell_inventory_ptr_->cellInventoryEnd(); ++cell_iterator) {
+    CellG *cell = cell_inventory_ptr_->getCell(cell_iterator);
+    output_com_file << cell->id << sep << current_step;
+    output_com_file << sep << cell->xCOM << sep << cell->yCOM << sep << cell->zCOM;
+    output_com_file << sep << cell->xCCOM << sep << cell->yCCOM << sep << cell->zCCOM;
+    output_com_file << endl;
+  }
+
+  output_com_file.close();
+  is_first_output_ = false;
 }
 
-
 void SaveCOM::update(CC3DXMLElement *xml_data, bool full_init_flag) {
-  if (xml_data->findAttribute("Frequency")) {
-    char *end;
-    frequency_ = (int) strtol(xml_data->getAttribute("Frequency").c_str(), &end, 10);
-  }
-
   if (xml_data->findElement("COMFileName")) {
     CC3DXMLElement *COMFileNameElement = xml_data->getFirstElement("COMFileName");
     com_fname_ = COMFileNameElement->getText();
+  }
+
+  // Make sure we're outputting in the simulation directory
+  string basePath = simulator_->getBasePath();
+  if (!basePath.empty()) {
+    com_fname_ = basePath + "/" + com_fname_;
   }
 
 }

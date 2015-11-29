@@ -31,6 +31,7 @@ class SAVECOM_EXPORT SaveCOM: public Steppable {
 
   int frequency_;
   string com_fname_;
+  bool is_first_output_;
 
 
  public:
